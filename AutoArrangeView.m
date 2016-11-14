@@ -32,7 +32,9 @@
         _selectedTitleColor = [UIColor redColor];
         _defaultBackgroundColor = [UIColor whiteColor];
         _font = [UIFont systemFontOfSize:12];
+        _defaultSelectedIndex = -1;
         _itemHeight = 20;
+        _cloumCount = 3;
     }
     
     return self;
@@ -76,11 +78,10 @@
                 
                 [btn setFrame:CGRectMake((HoraSpace+BtnWidth)*j+HoraSpace, (VerticalSpace+BtnHeight)*i+VerticalSpace, BtnWidth, BtnHeight)];
                 
-                btn.titleLabel.font = [UIFont systemFontOfSize:15];
-                
                 [btn setTitleColor:self.defaultTitleColor forState:UIControlStateNormal];
                 [btn setTitleColor:self.highlightTitleColor forState:UIControlStateHighlighted];
                 [btn setTitleColor:self.selectedTitleColor forState:UIControlStateSelected];
+                [btn setTitleColor:self.selectedTitleColor forState:UIControlStateHighlighted|UIControlStateSelected];
                 
                 [btn setBackgroundColor:self.defaultBackgroundColor];
             
@@ -96,26 +97,25 @@
                 
                 if (self.selectedBackgroundImage) {
                     [btn setBackgroundImage:self.selectedBackgroundImage forState:UIControlStateSelected];
+                    [btn setBackgroundImage:self.selectedBackgroundImage forState:UIControlStateSelected|UIControlStateHighlighted];
                 }
                 
                 btn.layer.cornerRadius = 10;
+               
+                btn.titleLabel.font = self.font;
                 
-                if (self.font) {
-                    btn.titleLabel.font = self.font;
-                }
                 NSInteger index = i*_cloumCount + j;
                 btn.tag = index;
                 [btn addTarget:self action:@selector(clickAction:) forControlEvents:UIControlEventTouchUpInside];
                 
                 NSString *title = _itemArray[btn.tag];
                 
-                [btn setTitleEdgeInsets:UIEdgeInsetsMake(0, 10, 0, 0)];
-                
+               [btn setTitleEdgeInsets:self.titleEdgeInsets];
+
                 [btn setTitle:title forState:UIControlStateNormal];
                 
-                if (self.defaultSelectedIndex) {
+                if (self.defaultSelectedIndex >= 0) {
                     if (self.defaultSelectedIndex == index) {
-                        btn.selected = YES;
                         [self clickAction:btn];
                     }
                 }
@@ -142,20 +142,35 @@
     return viewHeight;
 }
 
+#pragma mark - 按钮点击事件
 -(void)clickAction:(UIButton *)sender
 {
-    if ([tempSelectButton isEqual:sender] && tempSelectButton) {
-        return;
+    // 如果允许反选取消
+    if (self.allowReverseSelection) {
+        
+        sender.selected = !sender.isSelected;
+        if ([self.delegate respondsToSelector:@selector(AutoArrangeView:button:atIndex:selected:)]) {
+            [self.delegate AutoArrangeView:self button:sender atIndex:sender.tag selected:sender.isSelected];
+        }
+        
+    }else // 不允许反选
+    {
+        if (sender.isSelected) {
+            return;
+        }
+        
+        if (!self.allowsMultipleSelection) { // 不允许多选
+            tempSelectButton.selected = NO;
+        }
+        tempSelectButton = sender;
+        sender.selected = YES;
+        
+        if ([self.delegate respondsToSelector:@selector(AutoArrangeView:selectButton:atIndex:)]) {
+            [self.delegate AutoArrangeView:self selectButton:sender atIndex:sender.tag];
+        }
+
     }
-    
-    tempSelectButton.selected = NO;
-    tempSelectButton = sender;
-    sender.selected = YES;
-    
-    if ([self.delegate respondsToSelector:@selector(AutoArrangeView:SelectButton:AtIndex:)]) {
-        [self.delegate AutoArrangeView:self SelectButton:sender AtIndex:sender.tag];
-    }
-    
 }
+
 
 @end

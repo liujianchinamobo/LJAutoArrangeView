@@ -12,7 +12,12 @@
 /**点击按钮回调*/
 @protocol AutoArrangeViewDelegate <NSObject>
 @optional
-- (void)AutoArrangeView:(AutoArrangeView *)view SelectButton:(UIButton *)btn AtIndex:(NSInteger)index;
+/**选择后回调 不允许反选*/
+- (void)AutoArrangeView:(AutoArrangeView *)view selectButton:(UIButton *)btn atIndex:(NSInteger)index;
+
+/**选择户回调 允许反选*/
+- (void)AutoArrangeView:(AutoArrangeView *)view button:(UIButton *)btn atIndex:(NSInteger)index selected:(BOOL)selected;
+
 @end
 
 
@@ -41,12 +46,16 @@
 @property (nonatomic, strong) UIFont * font;
 /** 代理*/
 @property (nonatomic, strong) id<AutoArrangeViewDelegate> delegate;
-/** 默认选中的index（0 代表没有选中，默认是第一个选中）*/
+/** 默认选中的index*/
 @property (nonatomic, assign) NSInteger  defaultSelectedIndex;
-/**返回合适的view高度*/
-@property (nonatomic, assign,readonly) CGFloat height;
-
-/**开始布局，要在最后调用*/
+/**是否允许多选 默认不允许*/
+@property (nonatomic, assign) BOOL  allowsMultipleSelection;
+/**是否允许反选取消，默认不允许*/
+@property (nonatomic, assign) BOOL  allowReverseSelection;
+/**文字布局设置*/
+@property (nonatomic, assign) UIEdgeInsets titleEdgeInsets;
+/**开始布局，要在上面的配置完后再来调用*/
 -(void)startLayoutItem;
-
+/**返回布局以后合适的view高度*/
+@property (nonatomic, assign,readonly) CGFloat height;
 @end
