@@ -8,6 +8,8 @@
 
 #import "AutoArrangeView.h"
 
+/** 布局按钮的衍生类，可以设置初始哪些按钮是选中状态 */
+
 @interface AutoButtonView : AutoArrangeView
 /**默认已经选中的按钮*/
 @property (nonatomic, strong) NSArray * selectedItem;

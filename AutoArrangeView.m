@@ -148,10 +148,25 @@
     // 如果允许反选取消
     if (self.allowReverseSelection) {
         
+        // 点一个新按钮
+        if (sender != tempSelectButton && !sender.isSelected) {
+            
+            // 不可以多选
+            if (!self.allowsMultipleSelection)
+            {
+                [self resetButton];
+                if ([self.delegate respondsToSelector:@selector(AutoArrangeView:button:atIndex:selected:)]) {
+                    [self.delegate AutoArrangeView:self button:tempSelectButton atIndex:tempSelectButton.tag selected:NO];
+                }
+            }
+        }
+        
         sender.selected = !sender.isSelected;
+        tempSelectButton = sender;
         if ([self.delegate respondsToSelector:@selector(AutoArrangeView:button:atIndex:selected:)]) {
             [self.delegate AutoArrangeView:self button:sender atIndex:sender.tag selected:sender.isSelected];
         }
+
         
     }else // 不允许反选
     {
@@ -160,17 +175,26 @@
         }
         
         if (!self.allowsMultipleSelection) { // 不允许多选
-            tempSelectButton.selected = NO;
+            
+            [self resetButton];
+            if ([self.delegate respondsToSelector:@selector(AutoArrangeView:button:atIndex:selected:)]) {
+                [self.delegate AutoArrangeView:self button:tempSelectButton atIndex:tempSelectButton.tag selected:NO];
+            }
         }
         tempSelectButton = sender;
         sender.selected = YES;
         
-        if ([self.delegate respondsToSelector:@selector(AutoArrangeView:selectButton:atIndex:)]) {
-            [self.delegate AutoArrangeView:self selectButton:sender atIndex:sender.tag];
+        if ([self.delegate respondsToSelector:@selector(AutoArrangeView:button:atIndex:selected:)]) {
+            [self.delegate AutoArrangeView:self button:sender atIndex:sender.tag selected:sender.isSelected];
         }
 
     }
 }
 
-
+- (void)resetButton
+{
+    for (UIButton *btn in self.subviews) {
+        btn.selected = NO;
+    }
+}
 @end
